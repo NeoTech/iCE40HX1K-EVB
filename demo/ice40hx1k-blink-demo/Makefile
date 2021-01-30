@@ -1,4 +1,4 @@
-PROJ = example
+PROJ = blink
 PIN_DEF = ice40hx1k-evb.pcf
 DEVICE = hx1k
 FLASHROM = /usr/bin/flashrom
@@ -9,6 +9,9 @@ all: sim sint pack vvp
 sim: $(PROJ)_tb.vcd
 
 sint: $(PROJ).bin $(PROJ).asc $(PROJ).json $(PROJ).rpt $(PROJ)_tb.out
+
+%_tb.out: %.v
+	iverilog -o $@ $<
 
 %.json: %.v
 	yosys -p 'synth_ice40 -top top -json $@' $<
@@ -31,8 +34,6 @@ buspirate: $(PROJ).img
 	@echo '---------------------------'
 	$(FLASHROM) -p buspirate_spi:dev=/dev/ttyUSB0,spispeed=2M -w $<
 
-%_tb.out: %.v
-	iverilog -o $@ $<
 
 %_tb.vcd: %_tb.out
 	@echo "No testbench added"
